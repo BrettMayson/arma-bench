@@ -21,8 +21,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Convert repository name to lower case
+      run: echo IMAGE_REPOSITORY="$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
+
     - name: Build Image
-      run: docker build . -t ghcr.io/${{ github.repository }}:latest
+      run: docker build . -t ghcr.io/${{ env.IMAGE_REPOSITORY }}:latest
 
     - name: Push Image
-      run: docker push ghcr.io/${{ github.repository }}:latest
+      run: docker push ghcr.io/${{ env.IMAGE_REPOSITORY }}:latest
