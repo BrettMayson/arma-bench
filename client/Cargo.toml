@@ -1,0 +1,20 @@
+[package]
+name = "arma-bench"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+arma-rs = { workspace = true, features = ["serde"] }
+rmp-serde = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+uuid = { workspace = true, features = ["serde"] }
+
+tokio = { workspace = true, features = ["full"], optional = true }
+
+[features]
+default = []
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["full"] }

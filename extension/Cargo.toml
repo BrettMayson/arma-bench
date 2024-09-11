@@ -1,0 +1,14 @@
+[package]
+name = "arma-bench-extension"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+arma-bench = { path = "../client" }
+
+arma-rs = { workspace = true, features = ["serde"] }
+serde_json = { workspace = true }
+
+[lib]
+name = "tab"
+crate-type = ["cdylib"]

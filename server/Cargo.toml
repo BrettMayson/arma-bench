@@ -1,0 +1,18 @@
+[package]
+name = "arma-bench-server"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+arma-bench = { path = "../client", features = ["tokio"] }
+
+rmp-serde = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+uuid = { workspace = true, features = ["v4"] }
+serde_json = { workspace = true }
+
+hemtt-pbo = { git = "https://github.com/brettmayson/hemtt", branch = "main" }
+
+tokio = { workspace = true, features = ["full"] }
