@@ -29,7 +29,7 @@ pub async fn install(config: &ServerConfig) -> Result<PathBuf, String> {
     // otherwise, download the server and return the path
     debug!("Downloading {} server to {:?}", fs_branch, path);
     let command = Command::new("/steamcmd/steamcmd.sh")
-        .arg(format!("+login {} {}", steam_user, steam_pass))
+        .arg(format!("+login {steam_user} {steam_pass}"))
         .arg("+force_install_dir")
         .arg(&path)
         .arg("+app_update 233780")
@@ -39,7 +39,7 @@ pub async fn install(config: &ServerConfig) -> Result<PathBuf, String> {
         .await
         .map_err(|e| e.to_string())?;
     if !command.status.success() {
-        return Err(format!("Failed to install server: {:?}", command));
+        return Err(format!("Failed to install server: {command:?}"));
     }
     Ok(path)
 }
@@ -49,7 +49,7 @@ pub async fn start(config: &ServerConfig, built: &BuiltRequest) -> Result<(Uuid,
     let name = Uuid::new_v4();
     let command = Command::new(path.join(&config.binary))
         .current_dir(&path)
-        .arg(format!("-name={}", name))
+        .arg(format!("-name={name}"))
         .arg("-world=empty")
         .arg("-limitFPS=1000")
         .arg("-profiles=\"/tmp/arma_profiles\"")

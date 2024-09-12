@@ -10,7 +10,7 @@ pub struct BuiltRequest {
 
 impl Drop for BuiltRequest {
     fn drop(&mut self) {
-        std::fs::remove_dir_all(&self.path).unwrap();
+        std::fs::remove_dir_all(&self.path).expect("Failed to remove temp directory");
     }
 }
 
@@ -20,7 +20,7 @@ pub fn build(request: &Request) -> BuiltRequest {
         .join("arma_bench")
         .join(&id)
         .join("addons");
-    std::fs::create_dir_all(&path).unwrap();
+    std::fs::create_dir_all(&path).expect("Failed to create temp directory");
     let config = r#"
     class CfgPatches {
         class TAB {
@@ -41,33 +41,33 @@ pub fn build(request: &Request) -> BuiltRequest {
             };
         };
     };"#;
-    let mut file = std::fs::File::create(path.join("execute.pbo")).unwrap();
+    let mut file = std::fs::File::create(path.join("execute.pbo")).expect("Failed to create PBO");
     let mut pbo = WritablePbo::new();
     pbo.add_property("prefix", "tab");
     pbo.add_file("config.cpp", Cursor::new(config.as_bytes()))
-        .unwrap();
+        .expect("Failed to add config.cpp");
     match request {
         Request::Execute(content) => {
             let bootstrap = format!(
                 r#"
             private _out = diag_codePerformance [{{
-                {}
+                {content}
             }}];
-            private _ret = call {{ {} }};
-            "tab" callExtension ["execute", ["{}", _out, _ret]];
-            "#,
-                content, content, id
+            private _ret = call {{ {content} }};
+            "tab" callExtension ["execute", ["{id}", _out, _ret]];
+            "#
             );
             pbo.add_file("bootstrap.sqf", Cursor::new(bootstrap.as_bytes()))
-                .unwrap();
-            pbo.write(&mut file, true).unwrap();
+                .expect("Failed to add bootstrap.sqf");
+            pbo.write(&mut file, true).expect("Failed to write PBO");
         }
         Request::Compare(files) => {
             let mut ids = Vec::new();
             for file in files {
                 ids.push(file.id.to_string());
                 let filename = format!("{}.{}", file.id, if file.sqfc { "sqfc" } else { "sqf" });
-                pbo.add_file(&filename, Cursor::new(&file.content)).unwrap();
+                pbo.add_file(&filename, Cursor::new(&file.content))
+                    .expect("Failed to add file");
             }
             let bootstrap = format!(
                 r#"
@@ -85,11 +85,11 @@ pub fn build(request: &Request) -> BuiltRequest {
                 id
             );
             pbo.add_file("bootstrap.sqf", Cursor::new(bootstrap.as_bytes()))
-                .unwrap();
-            pbo.write(&mut file, true).unwrap();
+                .expect("Failed to add bootstrap.sqf");
+            pbo.write(&mut file, true).expect("Failed to write PBO");
         }
     }
     BuiltRequest {
-        path: path.parent().unwrap().to_owned(),
+        path: path.parent().expect("Failed to get parent").to_path_buf(),
     }
 }

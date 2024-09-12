@@ -13,19 +13,33 @@ pub static HEADER_ID: &[u8; 16] = b"ARMABENCH-VER010";
 pub static DEFAULT_PORT: u16 = 7562;
 
 pub trait Message: Deserialize<'static> + Serialize + Sync {
+    /// Read a message from a reader.
+    ///
+    /// # Errors
+    /// Returns a string error if the message could not be read.
+    ///
+    /// # Panics
+    /// Panics on I/O errors.
     fn from_reader<R: Read>(reader: &'_ mut R) -> Result<Self, String>
     where
         Self: Sized,
     {
         let mut len_buf = [0; 8];
         reader.read_exact(&mut len_buf).map_err(|e| e.to_string())?;
-        let len = u64::from_le_bytes(len_buf);
-        let mut payload = vec![0; len as usize];
+        let len = usize::try_from(u64::from_le_bytes(len_buf)).map_err(|e| e.to_string())?;
+        let mut payload = vec![0; len];
         reader.read_exact(&mut payload).map_err(|e| e.to_string())?;
         Deserialize::deserialize(&mut Deserializer::new(payload.as_slice()))
             .map_err(|e| e.to_string())
     }
 
+    /// Write a message to a writer.
+    ///
+    /// # Errors
+    /// Returns a string error if the message could not be written.
+    ///
+    /// # Panics
+    /// Panics on I/O errors.
     fn write<W: Write>(&self, writer: &mut W) -> Result<(), String> {
         let payload = rmp_serde::to_vec(self).map_err(|e| e.to_string())?;
         let mut len_buf = [0; 8];
@@ -48,8 +62,8 @@ pub trait Message: Deserialize<'static> + Serialize + Sync {
                 .read_exact(&mut len_buf)
                 .await
                 .map_err(|e| e.to_string())?;
-            let len = u64::from_le_bytes(len_buf);
-            let mut payload = vec![0; len as usize];
+            let len = usize::try_from(u64::from_le_bytes(len_buf)).map_err(|e| e.to_string())?;
+            let mut payload = vec![0; len];
             reader
                 .read_exact(&mut payload)
                 .await
@@ -94,7 +108,7 @@ impl Default for ServerConfig {
         Self {
             binary: "arma3server_x64".to_string(),
             branch: "public".to_string(),
-            branch_password: "".to_string(),
+            branch_password: String::new(),
         }
     }
 }

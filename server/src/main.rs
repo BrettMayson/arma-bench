@@ -20,5 +20,5 @@ async fn main() {
 }
 
 fn require_env(name: &str) -> String {
-    std::env::var(name).unwrap_or_else(|_| panic!("{} not set", name))
+    std::env::var(name).unwrap_or_else(|_| panic!("{name} not set"))
 }

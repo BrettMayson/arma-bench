@@ -1,7 +1,7 @@
 use arma_bench::{Client, CompareRequest, CompareResult, ServerConfig};
 
 fn main() {
-    let client = Client::connect("localhost", ServerConfig::default()).unwrap();
+    let client = Client::connect("localhost", &ServerConfig::default()).expect("Failed to connect");
     let requests = vec![
         CompareRequest {
             id: 0,
@@ -12,11 +12,11 @@ fn main() {
         },
         CompareRequest {
             id: 1,
-            content: "1 + 2".as_bytes().to_vec(),
+            content: b"1 + 2".to_vec(),
             sqfc: false,
         },
     ];
-    let results = client.compare(requests).unwrap();
+    let results = client.compare(requests).expect("Failed to compare");
     for result in results {
         let CompareResult {
             id,
