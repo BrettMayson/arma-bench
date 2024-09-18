@@ -15,17 +15,19 @@ fn init() -> Extension {
 
 #[allow(clippy::needless_pass_by_value)]
 fn timeout(id: String, time: u64) {
-    std::thread::sleep(std::time::Duration::from_secs(time));
-    // create a file to indicate the timeout, write the time
-    std::fs::File::create(
-        PathBuf::from("/tmp/arma_bench")
-            .join(&id)
-            .join("timeout.txt"),
-    )
-    .expect("Failed to create timeout.txt")
-    .write_all(time.to_string().as_bytes())
-    .expect("Failed to write timeout.txt");
-    die();
+    std::thread::spawn(move || {
+        std::thread::sleep(std::time::Duration::from_secs(time));
+        // create a file to indicate the timeout, write the time
+        std::fs::File::create(
+            PathBuf::from("/tmp/arma_bench")
+                .join(&id)
+                .join("timeout.txt"),
+        )
+        .expect("Failed to create timeout.txt")
+        .write_all(time.to_string().as_bytes())
+        .expect("Failed to write timeout.txt");
+        die();
+    });
 }
 
 #[allow(clippy::needless_pass_by_value)]
