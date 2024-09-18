@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{io::Write, path::PathBuf};
 
 use arma_bench::{CompareResult, ExecuteResult};
 use arma_rs::{arma, Extension, Value};
@@ -13,8 +13,18 @@ fn init() -> Extension {
         .finish()
 }
 
-fn timeout(time: u64) {
+#[allow(clippy::needless_pass_by_value)]
+fn timeout(id: String, time: u64) {
     std::thread::sleep(std::time::Duration::from_secs(time));
+    // create a file to indicate the timeout, write the time
+    std::fs::File::create(
+        PathBuf::from("/tmp/arma_bench")
+            .join(&id)
+            .join("timeout.txt"),
+    )
+    .expect("Failed to create timeout.txt")
+    .write_all(time.to_string().as_bytes())
+    .expect("Failed to write timeout.txt");
     die();
 }
 

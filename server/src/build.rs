@@ -50,12 +50,16 @@ pub fn build(request: &Request) -> BuiltRequest {
         Request::Execute(content) => {
             let bootstrap = format!(
                 r#"
-            "tab" callExtension ["timeout", [30]];
+            diag_log "creating timeout";
+            "tab" callExtension ["timeout", [{id}, 30]];
+            diag_log "starting benchmark";
             private _out = diag_codePerformance [{{
                 {content}
             }}];
             private _ret = call {{ {content} }};
+            diag_log "benchmark complete, saving results";
             "tab" callExtension ["execute", ["{id}", _out, _ret]];
+            diag_log "dying";
             "tab" callExtension ["die"];
             "#
             );
@@ -73,16 +77,21 @@ pub fn build(request: &Request) -> BuiltRequest {
             }
             let bootstrap = format!(
                 r#"
-            "tab" callExtension ["timeout", [120]];
+            diag_log "creating timeout";
+            "tab" callExtension ["timeout", [{id}, 120]];
+            diag_log "starting benchmark";
             private _out = [];
             {{
                 private _code = compileScript [format["\tab\%1.sqf", _x]];
                 private _ret = [_x];
+                diag_log format["benchmarking %1", _x];
                 _ret pushBack diag_codePerformance [_code];
                 _ret pushBack call _code;
                 _out pushBack _ret;
             }} forEach ["{}"];
+            diag_log "benchmark complete, saving results";
             "tab" callExtension ["compare", ["{}", _out]];
+            diag_log "dying";
             "tab" callExtension ["die"];
             "#,
                 ids.join("\", \""),

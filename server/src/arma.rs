@@ -29,15 +29,16 @@ pub async fn install(config: &ServerConfig) -> Result<PathBuf, String> {
     // otherwise, download the server and return the path
     debug!("Downloading {} server to {:?}", fs_branch, path);
     let mut command = Command::new("/steamcmd/steamcmd.sh");
-    command.arg(format!("+login {steam_user} {steam_pass}"))
-        .arg("+force_install_dir")
+    command.arg("+force_install_dir")
         .arg(&path)
+        .arg(format!("+login {steam_user} {steam_pass}"))
         .arg("+app_update 233780");
-
     if config.branch != "public" {
+        debug!("Using branch {}", config.branch);
         command.arg("-beta").arg(&config.branch);
     }
     if !config.branch_password.is_empty() {
+        debug!("Using branch password {}", config.branch_password);
         command.arg("-betapassword").arg(&config.branch_password);
     }
     let command = command
