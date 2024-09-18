@@ -67,6 +67,12 @@ async fn handle(request: RequestHandle) {
         }
     };
     let _ = child.wait().await;
+    if built.path.join("timeout.txt").exists() {
+        let content = std::fs::read_to_string(built.path.join("timeout.txt"))
+            .expect("Failed to read timeout.txt");
+        let _ = callback.send(Response::Error(format!("timeout: {content}")));
+        return;
+    }
     match request {
         Request::Execute(_) => {
             match std::panic::catch_unwind(move || {
