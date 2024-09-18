@@ -51,7 +51,7 @@ pub fn build(request: &Request) -> BuiltRequest {
             let bootstrap = format!(
                 r#"
             diag_log "creating timeout";
-            "tab" callExtension ["timeout", [{id}, 30]];
+            "tab" callExtension ["timeout", ["{id}", 30]];
             diag_log "starting benchmark";
             private _out = diag_codePerformance [{{
                 {content}
@@ -78,7 +78,7 @@ pub fn build(request: &Request) -> BuiltRequest {
             let bootstrap = format!(
                 r#"
             diag_log "creating timeout";
-            "tab" callExtension ["timeout", [{id}, 120]];
+            "tab" callExtension ["timeout", ["{id}", 120]];
             diag_log "starting benchmark";
             private _out = [];
             {{
@@ -90,12 +90,11 @@ pub fn build(request: &Request) -> BuiltRequest {
                 _out pushBack _ret;
             }} forEach ["{}"];
             diag_log "benchmark complete, saving results";
-            "tab" callExtension ["compare", ["{}", _out]];
+            "tab" callExtension ["compare", ["{id}", _out]];
             diag_log "dying";
             "tab" callExtension ["die"];
             "#,
-                ids.join("\", \""),
-                id
+                ids.join("\", \"")
             );
             pbo.add_file("bootstrap.sqf", Cursor::new(bootstrap.as_bytes()))
                 .expect("Failed to add bootstrap.sqf");
