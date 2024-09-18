@@ -60,7 +60,7 @@ pub fn build(request: &Request) -> BuiltRequest {
             diag_log "benchmark complete, saving results";
             "tab" callExtension ["execute", ["{id}", _out, _ret]];
             diag_log "dying";
-            "tab" callExtension ["die"];
+            "tab" callExtension ["die", []];
             "#
             );
             pbo.add_file("bootstrap.sqf", Cursor::new(bootstrap.as_bytes()))
@@ -92,7 +92,7 @@ pub fn build(request: &Request) -> BuiltRequest {
             diag_log "benchmark complete, saving results";
             "tab" callExtension ["compare", ["{id}", _out]];
             diag_log "dying";
-            "tab" callExtension ["die"];
+            "tab" callExtension ["die", []];
             "#,
                 ids.join("\", \"")
             );
