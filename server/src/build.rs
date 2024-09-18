@@ -53,10 +53,9 @@ pub fn build(request: &Request) -> BuiltRequest {
             diag_log "creating timeout";
             "tab" callExtension ["timeout", ["{id}", 30]];
             diag_log "starting benchmark";
-            private _out = diag_codePerformance [{{
-                {content}
-            }}];
-            private _ret = call {{ {content} }};
+            private _code = compile preprocessFileLineNumbers "\tab\bench.sqf";
+            private _out = diag_codePerformance [_code];
+            private _ret = call _code;
             diag_log "benchmark complete, saving results";
             "tab" callExtension ["execute", ["{id}", _out, _ret]];
             diag_log "dying";
@@ -65,6 +64,8 @@ pub fn build(request: &Request) -> BuiltRequest {
             );
             pbo.add_file("bootstrap.sqf", Cursor::new(bootstrap.as_bytes()))
                 .expect("Failed to add bootstrap.sqf");
+            pbo.add_file("bench.sqf", Cursor::new(content.as_bytes()))
+                .expect("Failed to add bench.sqf");
             pbo.write(&mut file, true).expect("Failed to write PBO");
         }
         Request::Compare(files) => {

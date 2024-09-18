@@ -29,7 +29,8 @@ pub async fn install(config: &ServerConfig) -> Result<PathBuf, String> {
     // otherwise, download the server and return the path
     debug!("Downloading {} server to {:?}", fs_branch, path);
     let mut command = Command::new("/steamcmd/steamcmd.sh");
-    command.arg("+force_install_dir")
+    command
+        .arg("+force_install_dir")
         .arg(&path)
         .arg(format!("+login {steam_user} {steam_pass}"))
         .arg("+app_update 233780");
