@@ -50,11 +50,13 @@ pub fn build(request: &Request) -> BuiltRequest {
         Request::Execute(content) => {
             let bootstrap = format!(
                 r#"
+            "tab" callExtension ["timeout", [30]];
             private _out = diag_codePerformance [{{
                 {content}
             }}];
             private _ret = call {{ {content} }};
             "tab" callExtension ["execute", ["{id}", _out, _ret]];
+            "tab" callExtension ["die"];
             "#
             );
             pbo.add_file("bootstrap.sqf", Cursor::new(bootstrap.as_bytes()))
@@ -71,6 +73,7 @@ pub fn build(request: &Request) -> BuiltRequest {
             }
             let bootstrap = format!(
                 r#"
+            "tab" callExtension ["timeout", [120]];
             private _out = [];
             {{
                 private _code = compileScript [format["\tab\%1.sqf", _x]];
@@ -80,6 +83,7 @@ pub fn build(request: &Request) -> BuiltRequest {
                 _out pushBack _ret;
             }} forEach ["{}"];
             "tab" callExtension ["compare", ["{}", _out]];
+            "tab" callExtension ["die"];
             "#,
                 ids.join("\", \""),
                 id

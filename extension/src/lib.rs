@@ -6,9 +6,16 @@ use arma_rs::{arma, Extension, Value};
 #[arma]
 fn init() -> Extension {
     Extension::build()
+        .command("timeout", timeout)
         .command("execute", execute)
         .command("compare", compare)
+        .command("die", die)
         .finish()
+}
+
+fn timeout(time: u64) {
+    std::thread::sleep(std::time::Duration::from_secs(time));
+    die();
 }
 
 #[allow(clippy::needless_pass_by_value)]
@@ -27,7 +34,6 @@ fn execute(id: String, data: (f64, u32), value: Value) {
         };
         serde_json::to_writer(&mut out, &data).expect("Failed to write execute.txt");
     }
-    std::process::exit(0);
 }
 
 #[allow(clippy::needless_pass_by_value)]
@@ -50,5 +56,8 @@ fn compare(id: String, data: Vec<(String, (f64, u32), Value)>) {
             .collect::<Vec<_>>();
         serde_json::to_writer(&mut out, &data).expect("Failed to write compare.txt");
     }
+}
+
+fn die() {
     std::process::exit(0);
 }
