@@ -28,11 +28,19 @@ pub async fn install(config: &ServerConfig) -> Result<PathBuf, String> {
     let steam_pass = std::env::var("STEAM_PASS").map_err(|_| "STEAM_PASS not set")?;
     // otherwise, download the server and return the path
     debug!("Downloading {} server to {:?}", fs_branch, path);
-    let command = Command::new("/steamcmd/steamcmd.sh")
-        .arg(format!("+login {steam_user} {steam_pass}"))
+    let mut command = Command::new("/steamcmd/steamcmd.sh");
+    command.arg(format!("+login {steam_user} {steam_pass}"))
         .arg("+force_install_dir")
         .arg(&path)
-        .arg("+app_update 233780")
+        .arg("+app_update 233780");
+
+    if config.branch != "public" {
+        command.arg("-beta").arg(&config.branch);
+    }
+    if !config.branch_password.is_empty() {
+        command.arg("-betapassword").arg(&config.branch_password);
+    }
+    let command = command
         .arg("validate")
         .arg("+quit")
         .output()
